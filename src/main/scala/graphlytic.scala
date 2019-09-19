@@ -8,14 +8,22 @@ object graphlytic {
  def main(args: Array[String]) {
 
    // setup the Spark Context
-   val conf = new SparkConf().setAppName("Wiki")
+   val conf = new SparkConf().setAppName("Wiki").setMaster("local[2]")
    val sc = new SparkContext(conf)
 
    // read in the data from HDFS
-   val filepath = "hdfs://ec2-3-212-99-96.compute-1.amazonaws.com:9000/user/wikipedia.dat"
+   val inputFilepath = "hdfs://ec2-3-212-99-96.compute-1.amazonaws.com:9000/user/wikipedia.dat"
+   val outputFilepath = "hdfs://ec2-3-212-99-96.compute-1.amazonaws.com:9000/user/wikiTerms.txt"
    val wikiRdd: RDD[WikipediaArticle] = sc
-     .textFile(filepath)
+     .textFile(inputFilepath)
      .map(WikipediaData.parse)
+
+   val wikiTermsPairRdd = wikiRdd.flatMap(
+     (wiki)=>wiki.terms.map((term)=>(term, wiki.title))
+   )
+   wikiTermsPairRdd.saveAsTextFile(outputFilepath)
+
+   //price_vol_min30.saveAsTextFile("hdfs://ec2-3-212-99-96.compute-1.amazonaws.com:9000/user/price_data_output_scala")
 
    // // map each record into a tuple consisting of (time, price, volume)
    // val ticks = file.map(line => {
