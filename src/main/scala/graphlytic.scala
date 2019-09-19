@@ -1,6 +1,8 @@
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
 import org.apache.spark.SparkConf
+import org.apache.spark.rdd.RDD
+import wikipedia._
 
 object graphlytic {
  def main(args: Array[String]) {
@@ -10,8 +12,10 @@ object graphlytic {
    val sc = new SparkContext(conf)
 
    // read in the data from HDFS
-   val file_name = "hdfs://ec2-3-212-99-96.compute-1.amazonaws.com:9000/user/wikipedia.dat"
-   val file = sc.textFile(file_name)
+   val filepath = "hdfs://ec2-3-212-99-96.compute-1.amazonaws.com:9000/user/wikipedia.dat"
+   val wikiRdd: RDD[WikipediaArticle] = sc
+     .textFile(filepath)
+     .map(WikipediaData.parse)
 
    // // map each record into a tuple consisting of (time, price, volume)
    // val ticks = file.map(line => {
