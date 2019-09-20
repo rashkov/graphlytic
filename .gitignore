@@ -25,4 +25,5 @@ project/plugins/project/
 .worksheet
 /bin/
 
+.ensime
 .ensime_cache
