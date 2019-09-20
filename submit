@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+sbt assembly && spark-submit --class graphlytic --master spark://ec2-3-212-99-96.compute-1.amazonaws.com:7077 target/scala-2.11/graphlytic-assembly-1.0.jar
