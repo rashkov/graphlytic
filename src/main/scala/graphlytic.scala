@@ -4,11 +4,15 @@ import org.apache.spark.SparkConf
 import org.apache.spark.rdd.RDD
 import wikipedia._
 import com.redis._
+import java.time.Instant
 
 object graphlytic {
   val appName = "Graphlytic"
-  val inputFilepath = "hdfs://ec2-3-212-99-96.compute-1.amazonaws.com:9000/user/wikipedia.dat"
-  val outputFilepath = "hdfs://ec2-3-212-99-96.compute-1.amazonaws.com:9000/user/wikiTerms.txt"
+  val hdfsPath = "hdfs://ec2-3-212-99-96.compute-1.amazonaws.com:9000"
+  val inputFilepath = "${hdfsPath}/user/wikipedia.dat"
+  val timestamp = Instant.now.getEpochSecond.toString
+  val outputFilepath = s"${hdfsPath}/user/${timestamp}_wikiTerms.txt"
+
   // def publishToRedis(){
   //   val r = new RedisClient("10.0.0.8", 6379)
   //   r.set("somekey", "someval");
