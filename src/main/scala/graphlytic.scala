@@ -9,7 +9,7 @@ import java.time.Instant
 object graphlytic {
   val appName = "Graphlytic"
   val hdfsPath = "hdfs://ec2-3-212-99-96.compute-1.amazonaws.com:9000"
-  val inputFilepath = "${hdfsPath}/user/wikipedia.dat"
+  val inputFilepath = s"${hdfsPath}/user/wikipedia.dat"
   val timestamp = Instant.now.getEpochSecond.toString
   val outputFilepath = s"${hdfsPath}/user/${timestamp}_wikiTerms.txt"
 
@@ -31,9 +31,10 @@ object graphlytic {
       .textFile(inputFilepath)
       .map(WikipediaData.parse)
 
-    val wikiTermsPairRdd = wikiRdd.flatMap(
-      (wiki)=>wiki.terms.map((term)=>(term, wiki.title))
-    )
+    val wikiTermsPairRdd = wikiRdd
+      .flatMap((wiki)=>wiki.terms.map((term)=>(term, wiki.title)))
+      .groupByKey()
+      .mapValues((titles)=>titles.toArray.distinct)
     wikiTermsPairRdd.saveAsTextFile(outputFilepath)
     // publishToRedis()
   }
