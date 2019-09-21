@@ -8,10 +8,10 @@ import java.time.Instant
 
 object graphlytic {
   val appName = "Graphlytic"
-  val hdfsPath = "hdfs://ec2-3-212-99-96.compute-1.amazonaws.com:9000"
-  val inputFilepath = s"${hdfsPath}/user/wikipedia.dat"
   val timestamp = Instant.now.getEpochSecond.toString
-  val outputFilepath = s"${hdfsPath}/user/${timestamp}_wikiTerms.txt"
+  val bucketName = sys.env.get("bucket").get
+  val inputFilepath = s"s3a://${bucketName}/wikipedia.dat"
+  val outputFilepath = s"s3a://${bucketName}/${timestamp}_wikiTerms.txt"
 
   // def publishToRedis(){
   //   val r = new RedisClient("10.0.0.8", 6379)
