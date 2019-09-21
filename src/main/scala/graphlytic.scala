@@ -9,7 +9,10 @@ import java.time.Instant
 object graphlytic {
   val appName = "Graphlytic"
   val timestamp = Instant.now.getEpochSecond.toString
-  val bucketName = sys.env.get("bucket").get
+  val bucketName = sys.env.get("bucket") match {
+    case Some(name) => name
+    case None => throw new Exception("Please define a \"bucket\" environment variable")
+  }
   val inputFilepath = s"s3a://${bucketName}/wikipedia.dat"
   val outputFilepath = s"s3a://${bucketName}/${timestamp}_wikiTerms.txt"
 
@@ -20,13 +23,10 @@ object graphlytic {
   // }
 
   def main(args: Array[String]) {
-    // setup the Spark Context
     val conf = new SparkConf()
       .setAppName(appName)
-      .setMaster("local[2]")
     val sc = new SparkContext(conf)
 
-    // read in the data from HDFS
     val wikiRdd: RDD[WikipediaArticle] = sc
       .textFile(inputFilepath)
       .map(WikipediaData.parse).cache()
@@ -40,5 +40,5 @@ object graphlytic {
       )
     wikiTermsPairRdd.saveAsTextFile(outputFilepath)
     // publishToRedis()
-  }
+ }
 }
