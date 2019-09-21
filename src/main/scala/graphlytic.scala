@@ -29,12 +29,15 @@ object graphlytic {
     // read in the data from HDFS
     val wikiRdd: RDD[WikipediaArticle] = sc
       .textFile(inputFilepath)
-      .map(WikipediaData.parse)
+      .map(WikipediaData.parse).cache()
 
     val wikiTermsPairRdd = wikiRdd
       .flatMap((wiki)=>wiki.terms.map((term)=>(term, wiki.title)))
-      .groupByKey()
-      .mapValues((titles)=>titles.toArray.distinct)
+      .combineByKey(
+        (title: String) => Set(title),
+        (titles: Set[String], title) => titles+title,
+        (titles: Set[String], titles2: Set[String]) => titles++titles2
+      )
     wikiTermsPairRdd.saveAsTextFile(outputFilepath)
     // publishToRedis()
   }
