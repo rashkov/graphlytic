@@ -39,9 +39,3 @@ object graphlytic {
       .write.parquet(outputFilepath)
   }
 }
-
-// def publishToRedis(){
-//   val r = new RedisClient("10.0.0.8", 6379)
-//   r.set("somekey", "someval");
-//   println(r.get("somekey"))
-// }
