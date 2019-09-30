@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-sbt assembly && spark-submit --conf spark.executorEnv.bucket=${bucket} --class graphlytic --master spark://${sparkhost}:7077 target/scala-2.11/graphlytic-assembly-1.0.jar
+sbt assembly && spark-submit --conf spark.executorEnv.bucket=${bucket} --class graphlytic --master spark://${sparkhost}:7077 target/scala-2.11/graphlytic-assembly-1.0.jar | tee `date +%s`_driver_log.txt
