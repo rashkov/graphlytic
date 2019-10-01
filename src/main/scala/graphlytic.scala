@@ -19,6 +19,7 @@ object graphlytic {
   }
   // val inputFilepath = "file:///home/mike/wiki_foo.xml"
   val inputFilepath = s"s3a://${bucketName}/enwiki-20190901-pages-articles-multistream.xml"
+  //val inputFilepath = s"s3a://${bucketName}/wikipedia_part.xml"
   val outputFilepath = s"s3a://${bucketName}/${timestamp}_wiki_index"
 
   def main(args: Array[String]) {
@@ -41,6 +42,7 @@ object graphlytic {
     val wikiText = df.select("id", "revision.text._VALUE")
       .as[(Long, String)]
       .toDF("id", "text")
+      .filter($"id".isNotNull && $"text".isNotNull)
     val wikiTerms = regexTokenizer
       .transform(wikiText)
     val wikiTermsFiltered = remover
