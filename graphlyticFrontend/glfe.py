@@ -51,6 +51,7 @@ def search(terms):
         port=os.environ['REDIS_PORT'],
     )
     results = [int(a.decode()) for a in r.sinter(terms.split(' '))]
+    results.sort()
     return results
   except:
     return None
