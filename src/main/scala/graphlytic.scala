@@ -1,48 +1,63 @@
+import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
-import org.apache.spark.SparkConf
+import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.expressions._
+import org.apache.spark.ml.feature.{RegexTokenizer, StopWordsRemover}
+import com.databricks.spark.xml._
+import java.time.Instant
 
 object graphlytic {
- def main(args: Array[String]) {
+  val timestamp = Instant.now.getEpochSecond.toString
+  val bucketName = sys.env.get("bucket") match {
+    case Some(name) => name
+    case None => throw new Exception("Please define a \"bucket\" environment variable")
+  }
+  val inputFilepath = s"s3a://${bucketName}/enwiki-20190901-pages-articles-multistream.xml"
+  val outputFilepath = s"s3a://${bucketName}/${timestamp}_wiki_index"
 
-   // setup the Spark Context
-   val conf = new SparkConf().setAppName("Wiki")
-   val sc = new SparkContext(conf)
+  def main(args: Array[String]) {
+    val spark = SparkSession.builder.getOrCreate()
+    import spark.implicits._ // Enable $ syntax among other things
 
-   // read in the data from HDFS
-   val file_name = "hdfs://ec2-3-212-99-96.compute-1.amazonaws.com:9000/user/wikipedia.dat"
-   val file = sc.textFile(file_name)
+    // Parse input XML by reading <page> tags
+    val df = spark.read
+      .option("rowTag", "page")
+      .xml(inputFilepath)
 
-   // // map each record into a tuple consisting of (time, price, volume)
-   // val ticks = file.map(line => {
-   //                      val record = line.split(";")
-   //                     (record(0), record(1).toDouble, record(2).toInt)
-   //                              })
+    // Split words using regexTokenizer
+    val regexTokenizer = new RegexTokenizer()
+      .setInputCol("text")
+      .setOutputCol("all_terms")
+      .setPattern("\\W")
 
-   // // apply the time conversion to the time portion of each tuple and persist it memory for later use
-   // val ticks_min30 = ticks.map(record => (convert_to_30min(record._1),
-   //                                        record._2,
-   //                                        record._3)).persist
+    // Filter out english stopwords
+    val remover = new StopWordsRemover()
+      .setInputCol("all_terms")
+      .setOutputCol("filtered_terms")
 
-   // // compute the average price for each 30 minute period
-   // val price_min30 = ticks_min30.map(record => (record._1, (record._2, 1)))
-   //                              .reduceByKey( (x, y) => (x._1 + y._1,
-   //                                                       x._2 + y._2) )
-   //                              .map(record => (record._1,
-   //                                              record._2._1/record._2._2) )
+    // Select article ID & text fields, remove any with null values
+    val wikiText = df.select("id", "revision.text._VALUE")
+      .as[(Long, String)]
+      .toDF("id", "text")
+      .filter($"id".isNotNull && $"text".isNotNull)
 
-   // // compute the total volume for each 30 minute period
-   // val vol_min30 = ticks_min30.map(record => (record._1, record._3))
-   //                            .reduceByKey(_+_)
+    // Tokenize
+    val wikiTerms = regexTokenizer
+      .transform(wikiText)
 
-   // // join the two RDDs into a new RDD containing tuples of (30 minute time periods, average price, total volume)
-   // val price_vol_min30 = price_min30.join(vol_min30)
-   //                                  .sortByKey()
-   //                                  .map(record => (record._1,
-   //                                                  record._2._1,
-   //                                                  record._2._2))
-
-   // save the data back into HDFS
-   //price_vol_min30.saveAsTextFile("hdfs://ec2-3-212-99-96.compute-1.amazonaws.com:9000/user/price_data_output_scala")
- }
+    // Remove stopwords and build index, then write it to parquet in S3
+    val wikiTermsFiltered = remover
+      .transform(wikiTerms)
+      .drop("text", "all_terms")
+      .as[(Long, Array[String])]
+      .flatMap { case (id, terms) => terms.map((term)=>(term, id)) }
+      .toDF("term", "id")
+      .groupBy("term")
+      .agg(collect_set(col("id")) as "ids") // De-duplicate IDs via collect_set
+      .as[(String, Seq[Long])]
+      .write.parquet(outputFilepath)
+  }
 }
