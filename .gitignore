@@ -27,3 +27,7 @@ project/plugins/project/
 
 .ensime
 .ensime_cache
+
+# Front-end python ignore
+*.pyc
+*.out
