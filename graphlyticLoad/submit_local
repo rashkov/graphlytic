@@ -1,0 +1,1 @@
+sbt assembly && spark-submit --class example.Hello --master "local[2]" target/scala-2.11/foo-assembly-0.1.0-SNAPSHOT.jar
