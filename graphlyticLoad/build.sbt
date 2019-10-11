@@ -7,7 +7,7 @@ ThisBuild / organizationName := "example"
 
 lazy val root = (project in file("."))
   .settings(
-    name := "foo",
+    name := "graphlyticLoad",
     libraryDependencies ++= Seq(
       scalaTest % Test,
       "org.apache.spark" %% "spark-core" % "2.4.4" % "provided",

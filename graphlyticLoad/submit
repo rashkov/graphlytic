@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-sbt assembly && spark-submit --conf spark.executorEnv.BUCKET_PATH=${BUCKET_PATH} --conf spark.executorEnv.REDIS_HOST=${REDIS_HOST} --conf spark.executorEnv.REDIS_PORT=${REDIS_PORT} --conf spark.executorEnv.bucket=${bucket} --class example.Hello --master spark://${sparkhost}:7077 target/scala-2.11/foo-assembly-0.1.0-SNAPSHOT.jar | tee `date +%s`_driver_log.txt
+sbt assembly && spark-submit --conf spark.executorEnv.BUCKET_PATH=${BUCKET_PATH} --conf spark.executorEnv.REDIS_HOST=${REDIS_HOST} --conf spark.executorEnv.REDIS_PORT=${REDIS_PORT} --conf spark.executorEnv.bucket=${bucket} --class graphlyticLoad --master spark://${sparkhost}:7077 target/scala-2.11/graphlyticLoad-assembly-0.1.0-SNAPSHOT.jar | tee `date +%s`_driver_log.txt

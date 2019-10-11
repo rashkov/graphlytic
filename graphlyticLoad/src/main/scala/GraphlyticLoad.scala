@@ -3,7 +3,7 @@ package example
 import org.apache.spark.sql.SparkSession
 import com.redis._
 
-object Hello extends App {
+object GraphlyticLoad extends App {
   val spark = SparkSession.builder.getOrCreate()
   import spark.implicits._ // Enable implicit conversion in .as[]
   val bucketPath = sys.env.get("BUCKET_PATH") match {
