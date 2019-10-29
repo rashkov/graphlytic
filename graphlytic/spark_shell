@@ -1,0 +1,4 @@
+#!/bin/bash
+trap '' 2
+spark-shell -deprecation --conf spark.executorEnv.bucket=${bucket} --master spark://${sparkhost}:7077 --packages "com.databricks:spark-xml_2.11:0.6.0"
+trap 2
