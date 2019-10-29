@@ -1,5 +1,5 @@
 # graphlytic
-A search engine built on Spark
+A search engine over the Wikipedia dataset, built using Spark, Redis, and Flask.
 
 This is a monorepo housing three codebases:
 graphlytic -- Spark code for calculating a reverse index on the Wikipedia dataset
