@@ -2,42 +2,45 @@
 <head>
   <title>Graphlytic</title>
   <link rel="stylesheet" media="screen" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
+  <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"> -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-  <div class=container">
-    <div style="text-align: center;">
-      <h2>Graphlytic</h2>
-      <form  action="" method="post" role="form">
-        {{ form.csrf }}
-        <div class="form-group">
-          <label for="name">Search:</label>
-          <input type="text" class="form-control" id="term" name="term" placeholder="Graphle it...">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div style="text-align: center; margin-top: 45px; margin-bottom: 25px;">
+          <h2>Graphlytic</h2>
         </div>
-        <div style="text-align: center;">
-          <button type="submit" class="btn btn-success">Submit</button>
-        </div>
-      </form>
+        <form  action="" method="post" role="form">
+          {{ form.csrf }}
+          <div style="display: flex; justify-content: center;">
+            <div class="input-group" style="width: 60%;">
+              <input type="text" class="form-control" id="term" name="term" placeholder="Search!">
+              <div class="input-group-append">
+                <button type="submit" class="btn btn-xs btn-outline-secondary">Submit</button>
+              </div>
+              <!-- <span class="input-group-addon" id="basic-addon2"> -->
+              <!-- </span> -->
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
     <div class="row">
-      <div class="col-md-12">
-        <div>
-          {% if extracts %}
-            {% for extract in extracts %}
-              <div style="margin:25px; border: 1px solid black;">
-                <div>
-                  <a href="http://en.wikipedia.org/wiki/{{ extract['title_url'] }}?curid={{ extract['pageid'] }}">
-                    {{ extract['title'] }}
-                  </a>
-                </div>
-                  <div>{{ extract['extract'] }}</div>
+      <div class="offset-sm-2 col-sm-6">
+        {% if extracts %}
+          {% for extract in extracts %}
+            <div style="margin:25px;">
+              <div>
+                <a href="http://en.wikipedia.org/wiki/{{ extract['title_url'] }}?curid={{ extract['pageid'] }}">
+                  {{ extract['title'] }}
+                </a>
               </div>
-            {% endfor %}
-          {% else %}
-              No results yet!
-          {% endif %}
-        </div>
+                <div>{{ extract['extract'] }}</div>
+            </div>
+          {% endfor %}
+        {% endif %}
       </div>
     </div>
   </div>
