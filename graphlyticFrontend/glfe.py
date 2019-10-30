@@ -4,16 +4,16 @@ from flask import Flask, render_template, request
 from wtforms import Form, TextField, TextAreaField, validators, StringField, SubmitField
 import redis
 import requests
+import os
 
 app = Flask(__name__)
 app.config.from_object(__name__)
-
 
 class ReusableForm(Form):
   term = TextField('Term:', validators=[validators.DataRequired()])
 
 @app.route("/", methods=['GET', 'POST'])
-def hello():
+def queryGraphlytic():
   form = ReusableForm(request.form)
   extracts = None
   if request.method == 'POST' and form.validate():
