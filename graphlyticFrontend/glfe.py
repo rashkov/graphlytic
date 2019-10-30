@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from random import randint
 from flask import Flask, render_template, request
-from wtforms import Form, TextField, TextAreaField, validators, StringField, SubmitField
+from wtforms import Form, TextField, validators
 import redis
 import requests
 import os
