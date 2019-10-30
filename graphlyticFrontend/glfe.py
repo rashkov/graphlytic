@@ -19,15 +19,17 @@ def queryGraphlytic():
   if request.method == 'POST' and form.validate():
     terms=request.form['term']
     matchingArticleIds = search(terms)
-    extracts = fetchExtracts(matchingArticleIds)
+    extracts = fetchExtracts(matchingArticleIds, terms)
   return render_template('index.html', form=form, extracts=extracts)
 
-def fetchExtracts(ids):
+def fetchExtracts(ids, terms):
   if not ids:
     return []
   # Fetch a URL in this style:
   # https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exsentences=10&exintro=true&explaintext=true&pageids=15646344|1133422|552812
   extracts = []
+  titleMatch = []
+  articleMatch = []
   params={
     'action': "query",
     'format': "json",
@@ -41,8 +43,19 @@ def fetchExtracts(ids):
   pages = respJSON['query']['pages']
   for pageId in pages:
     [title, extract] = [pages[pageId].get(key) for key in ['title', 'extract']]
-    extracts.append({ 'title': title, 'extract': extract, 'pageid': pageId, 'title_url': str.lower(title).replace(" ", "_") })
-  return extracts
+    result = { 'title': title, 'extract': extract, 'pageid': pageId, 'title_url': str.lower(title).replace(" ", "_") }
+    if overlaps(title, terms):
+      titleMatch.append(result)
+    elif overlaps(title, extract):
+      articleMatch.append(result)
+    else:
+      extracts.append(result)
+
+  # Boost results which match the title, followed by those matching the extract
+  results = titleMatch
+  results.extend(articleMatch)
+  results.extend(extracts)
+  return results
 
 def search(terms):
   try:
@@ -57,6 +70,11 @@ def search(terms):
     return None
   else:
     r.close()
+
+def overlaps(str1, str2):
+  str1 = str1.lower()
+  str2 = str2.lower()
+  return len(set(str1.split(" ")) & set(str2.split(" "))) > 0
 
 if __name__ == "__main__":
     app.run()
